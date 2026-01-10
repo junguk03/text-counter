@@ -67,23 +67,57 @@ main {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.clear-btn {
+.button-group {
     position: absolute;
     top: 10px;
     right: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.copy-btn,
+.clear-btn {
     padding: 8px 16px;
-    background: #ff5252;
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
-    transition: background 0.3s;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.copy-btn {
+    background: #667eea;
+}
+
+.copy-btn:hover {
+    background: #5568d3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.copy-btn:active {
+    transform: translateY(0);
+}
+
+.copy-btn.copied {
+    background: #28a745;
+}
+
+.clear-btn {
+    background: #ff5252;
 }
 
 .clear-btn:hover {
     background: #ff1744;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 82, 82, 0.3);
+}
+
+.clear-btn:active {
+    transform: translateY(0);
 }
 
 .stats-section {
@@ -243,6 +277,17 @@ main {
     color: #666;
     font-size: 0.9rem;
     line-height: 1.5;
+}
+
+.chunk-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #667eea;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-left: 8px;
+    font-weight: 600;
 }
 
 .corrected-text {
