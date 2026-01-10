@@ -55,8 +55,8 @@ async function checkSpelling() {
             <p class="info">맞춤법 검사 사이트에서 <strong>Ctrl+V</strong> (또는 Command+V)로 붙여넣으세요.</p>
         `;
 
-        // 부산대 맞춤법 검사 사이트 새 창으로 열기
-        window.open('http://speller.cs.pusan.ac.kr/', '_blank');
+        // 한국어 맞춤법/문법 검사기 새 창으로 열기
+        window.open('https://kornorms.korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0003#a', '_blank');
 
     } catch (error) {
         // 복사 실패 시 폴백
@@ -69,7 +69,7 @@ async function checkSpelling() {
                 <p class="info">맞춤법 검사 사이트에서 <strong>Ctrl+V</strong> (또는 Command+V)로 붙여넣으세요.</p>
             `;
 
-            window.open('http://speller.cs.pusan.ac.kr/', '_blank');
+            window.open('https://kornorms.korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0003#a', '_blank');
 
         } catch (fallbackError) {
             // 복사도 실패한 경우
@@ -77,8 +77,8 @@ async function checkSpelling() {
                 <p class="warning">텍스트 복사에 실패했습니다.</p>
                 <p class="info">수동으로 텍스트를 복사한 후 아래 사이트를 이용해주세요:</p>
                 <ul class="alternatives">
-                    <li><a href="http://speller.cs.pusan.ac.kr/" target="_blank">부산대 맞춤법 검사기</a></li>
-                    <li><a href="https://kornorms.korean.go.kr/regltn/regltnView.do?regltn_code=0003#a" target="_blank">국립국어원 한국어 어문 규정</a></li>
+                    <li><a href="https://kornorms.korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0003#a" target="_blank">국립국어원 한국어 어문 규정</a></li>
+                    <li><a href="https://www.naver.com/" target="_blank">네이버 (맞춤법 검색)</a></li>
                 </ul>
             `;
         }
