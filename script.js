@@ -40,7 +40,7 @@ function updateStats() {
 async function checkSpellingChunk(text, retries = 3) {
     for (let i = 0; i < retries; i++) {
         try {
-            const response = await fetch('http://speller.cs.pusan.ac.kr/results', {
+            const response = await fetch('https://speller.cs.pusan.ac.kr/results', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
