@@ -36,93 +36,7 @@ function updateStats() {
     lineCount.textContent = lines.length.toLocaleString();
 }
 
-// 단일 청크 맞춤법 검사 함수 (부산대 API 사용)
-async function checkSpellingChunk(text, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch('https://speller.cs.pusan.ac.kr/results', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                },
-                body: `text1=${encodeURIComponent(text)}`
-            });
-
-            const html = await response.text();
-
-            // HTML 파싱하여 결과 추출
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-
-            // 오류 항목 추출
-            const errorItems = doc.querySelectorAll('.error_list li');
-            const errors = [];
-
-            errorItems.forEach(item => {
-                const wrong = item.querySelector('.data_original')?.textContent.trim() || '';
-                const correct = item.querySelector('.data_help a')?.textContent.trim() || '';
-                const help = item.querySelector('.data_context')?.textContent.trim() || '';
-
-                if (wrong && correct) {
-                    errors.push({
-                        orgStr: wrong,
-                        candWord: correct,
-                        help: help
-                    });
-                }
-            });
-
-            // 교정된 텍스트 추출
-            const resultText = doc.querySelector('.result_text')?.textContent.trim() || text;
-
-            return {
-                errata_count: errors.length,
-                errata: errors,
-                html: resultText
-            };
-
-        } catch (error) {
-            if (i === retries - 1) throw error;
-            // 재시도 전 대기 (500ms)
-            await new Promise(resolve => setTimeout(resolve, 500));
-        }
-    }
-}
-
-// 텍스트를 500자씩 분할하는 함수 (문장 단위 고려)
-function splitTextIntoChunks(text, maxLength = 500) {
-    const chunks = [];
-    let currentChunk = '';
-
-    // 문장 단위로 분리 (마침표, 느낌표, 물음표 기준)
-    const sentences = text.split(/([.!?]\s+)/);
-
-    for (let i = 0; i < sentences.length; i++) {
-        const sentence = sentences[i];
-
-        // 현재 청크에 추가했을 때 길이 초과 여부 확인
-        if ((currentChunk + sentence).length > maxLength) {
-            if (currentChunk.trim().length > 0) {
-                chunks.push(currentChunk.trim());
-                currentChunk = sentence;
-            } else {
-                // 문장 자체가 500자를 넘는 경우 강제 분할
-                chunks.push(sentence.substring(0, maxLength).trim());
-                currentChunk = sentence.substring(maxLength);
-            }
-        } else {
-            currentChunk += sentence;
-        }
-    }
-
-    if (currentChunk.trim().length > 0) {
-        chunks.push(currentChunk.trim());
-    }
-
-    return chunks;
-}
-
-// 맞춤법 검사 함수 (최대 8000자 지원)
+// 맞춤법 검사 (외부 사이트 열기)
 async function checkSpelling() {
     const text = textInput.value.trim();
 
@@ -131,99 +45,43 @@ async function checkSpelling() {
         return;
     }
 
-    if (text.length > 8000) {
-        spellCheckResult.innerHTML = '<p class="warning">맞춤법 검사는 8000자까지만 가능합니다. 텍스트를 나누어 검사해주세요.</p>';
-        return;
-    }
-
-    // 버튼 비활성화
-    spellCheckBtn.disabled = true;
-    spellCheckBtn.textContent = '검사 중...';
-
-    // 텍스트를 500자씩 분할
-    const chunks = splitTextIntoChunks(text, 500);
-
-    spellCheckResult.innerHTML = `<p class="loading">맞춤법 검사 중... (${chunks.length}개 구간 처리 중)</p>`;
-
     try {
-        let totalErrors = 0;
-        let allErrors = [];
-        let correctedChunks = [];
+        // 텍스트 복사
+        await navigator.clipboard.writeText(text);
 
-        // 각 청크를 순차적으로 검사 (병렬 처리 시 API 제한 가능)
-        for (let i = 0; i < chunks.length; i++) {
-            spellCheckResult.innerHTML = `<p class="loading">맞춤법 검사 중... (${i + 1}/${chunks.length} 구간 처리 중)</p>`;
+        // 안내 메시지 표시
+        spellCheckResult.innerHTML = `
+            <p class="success">✓ 텍스트가 클립보드에 복사되었습니다!</p>
+            <p class="info">맞춤법 검사 사이트에서 <strong>Ctrl+V</strong> (또는 Command+V)로 붙여넣으세요.</p>
+        `;
 
-            const result = await checkSpellingChunk(chunks[i]);
-
-            if (result.errata_count > 0) {
-                totalErrors += result.errata_count;
-                // 각 오류에 청크 번호 추가
-                result.errata.forEach(error => {
-                    allErrors.push({
-                        ...error,
-                        chunkIndex: i + 1
-                    });
-                });
-            }
-
-            // 교정된 텍스트 저장 (HTML 태그 제거)
-            const correctedText = result.html ? result.html.replace(/<\/?[^>]+(>|$)/g, '') : chunks[i];
-            correctedChunks.push(correctedText);
-
-            // API 요청 간격 조정 (500ms 대기)
-            if (i < chunks.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-        }
-
-        // 결과 표시
-        if (totalErrors === 0) {
-            spellCheckResult.innerHTML = '<p class="success">✓ 맞춤법 오류가 발견되지 않았습니다!</p>';
-        } else {
-            let html = `<p class="info">총 ${totalErrors}개의 오류가 발견되었습니다:</p>`;
-            html += '<div class="error-list">';
-
-            allErrors.forEach((error, index) => {
-                html += `
-                    <div class="error-item">
-                        <div class="error-number">${index + 1}</div>
-                        <div class="error-content">
-                            <div class="error-text">
-                                <span class="wrong">${error.orgStr}</span>
-                                <span class="arrow">→</span>
-                                <span class="correct">${error.candWord}</span>
-                            </div>
-                            <div class="error-help">${error.help || ''} ${chunks.length > 1 ? `<span class="chunk-badge">[구간 ${error.chunkIndex}]</span>` : ''}</div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            html += '</div>';
-
-            // 전체 교정된 텍스트 표시
-            const fullCorrectedText = correctedChunks.join(' ');
-            html += `<div class="corrected-text"><strong>교정된 텍스트:</strong><br>${fullCorrectedText}</div>`;
-
-            spellCheckResult.innerHTML = html;
-        }
+        // 부산대 맞춤법 검사 사이트 새 창으로 열기
+        window.open('http://speller.cs.pusan.ac.kr/', '_blank');
 
     } catch (error) {
-        console.error('맞춤법 검사 오류:', error);
-        spellCheckResult.innerHTML = `
-            <p class="error">맞춤법 검사 중 오류가 발생했습니다.</p>
-            <p class="info">네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요.</p>
-            <p class="info">대안: 다음 서비스를 이용해보세요:</p>
-            <ul class="alternatives">
-                <li><a href="http://speller.cs.pusan.ac.kr/" target="_blank">부산대 맞춤법 검사기</a></li>
-                <li><a href="https://kornorms.korean.go.kr/regltn/regltnView.do?regltn_code=0003#a" target="_blank">국립국어원 한국어 어문 규정</a></li>
-            </ul>
-        `;
-    } finally {
-        // 버튼 다시 활성화
-        spellCheckBtn.disabled = false;
-        spellCheckBtn.textContent = '맞춤법 검사하기';
+        // 복사 실패 시 폴백
+        try {
+            textInput.select();
+            document.execCommand('copy');
+
+            spellCheckResult.innerHTML = `
+                <p class="success">✓ 텍스트가 복사되었습니다!</p>
+                <p class="info">맞춤법 검사 사이트에서 <strong>Ctrl+V</strong> (또는 Command+V)로 붙여넣으세요.</p>
+            `;
+
+            window.open('http://speller.cs.pusan.ac.kr/', '_blank');
+
+        } catch (fallbackError) {
+            // 복사도 실패한 경우
+            spellCheckResult.innerHTML = `
+                <p class="warning">텍스트 복사에 실패했습니다.</p>
+                <p class="info">수동으로 텍스트를 복사한 후 아래 사이트를 이용해주세요:</p>
+                <ul class="alternatives">
+                    <li><a href="http://speller.cs.pusan.ac.kr/" target="_blank">부산대 맞춤법 검사기</a></li>
+                    <li><a href="https://kornorms.korean.go.kr/regltn/regltnView.do?regltn_code=0003#a" target="_blank">국립국어원 한국어 어문 규정</a></li>
+                </ul>
+            `;
+        }
     }
 }
 
