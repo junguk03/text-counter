@@ -36,32 +36,51 @@ function updateStats() {
     lineCount.textContent = lines.length.toLocaleString();
 }
 
-// 단일 청크 맞춤법 검사 함수
+// 단일 청크 맞춤법 검사 함수 (부산대 API 사용)
 async function checkSpellingChunk(text, retries = 3) {
     for (let i = 0; i < retries; i++) {
         try {
-            const response = await fetch('https://m.search.naver.com/p/csearch/ocontent/spellchecker.nhn', {
+            const response = await fetch('http://speller.cs.pusan.ac.kr/results', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 },
-                body: `_callback=window.__jindo2_callback._spellingCheck_0&q=${encodeURIComponent(text)}`
+                body: `text1=${encodeURIComponent(text)}`
             });
 
-            const textResponse = await response.text();
-            const jsonMatch = textResponse.match(/\((.+)\)/);
+            const html = await response.text();
 
-            if (!jsonMatch) {
-                throw new Error('응답 파싱 실패');
-            }
+            // HTML 파싱하여 결과 추출
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
 
-            const data = JSON.parse(jsonMatch[1]);
+            // 오류 항목 추출
+            const errorItems = doc.querySelectorAll('.error_list li');
+            const errors = [];
 
-            if (data.message && data.message.result) {
-                return data.message.result;
-            }
+            errorItems.forEach(item => {
+                const wrong = item.querySelector('.data_original')?.textContent.trim() || '';
+                const correct = item.querySelector('.data_help a')?.textContent.trim() || '';
+                const help = item.querySelector('.data_context')?.textContent.trim() || '';
 
-            throw new Error('결과 없음');
+                if (wrong && correct) {
+                    errors.push({
+                        orgStr: wrong,
+                        candWord: correct,
+                        help: help
+                    });
+                }
+            });
+
+            // 교정된 텍스트 추출
+            const resultText = doc.querySelector('.result_text')?.textContent.trim() || text;
+
+            return {
+                errata_count: errors.length,
+                errata: errors,
+                html: resultText
+            };
+
         } catch (error) {
             if (i === retries - 1) throw error;
             // 재시도 전 대기 (500ms)
