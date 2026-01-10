@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="무료 글자수 세기 및 맞춤법 검사 도구 - 실시간으로 글자수, 단어수, 문장수를 확인하고 맞춤법을 교정하세요">
+    <meta name="keywords" content="글자수 세기, 맞춤법 검사, 문자수 세기, 단어수 세기, 한글 맞춤법">
+    <meta name="google-site-verification" content="">
+    <title>글자수 세기 및 맞춤법 검사 - 무료 온라인 도구</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 글자수 세기 & 맞춤법 검사</h1>
+            <p class="subtitle">실시간으로 글자수를 확인하고 맞춤법을 교정하세요</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <textarea
+                    id="textInput"
+                    placeholder="여기에 텍스트를 입력하거나 붙여넣으세요..."
+                    autofocus
+                ></textarea>
+                <button id="clearBtn" class="clear-btn">전체 삭제</button>
+            </div>
+
+            <div class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-label">글자수 (공백 포함)</div>
+                    <div class="stat-value" id="charCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">글자수 (공백 제외)</div>
+                    <div class="stat-value" id="charCountNoSpace">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">단어수</div>
+                    <div class="stat-value" id="wordCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">문장수</div>
+                    <div class="stat-value" id="sentenceCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">줄 수</div>
+                    <div class="stat-value" id="lineCount">0</div>
+                </div>
+            </div>
+
+            <div class="spell-check-section">
+                <button id="spellCheckBtn" class="spell-check-btn">맞춤법 검사하기</button>
+                <div id="spellCheckResult" class="spell-check-result"></div>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2026 글자수 세기 및 맞춤법 검사 | 무료로 사용하세요</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
