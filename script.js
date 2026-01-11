@@ -53,6 +53,7 @@ async function checkSpelling() {
         spellCheckResult.innerHTML = `
             <p class="success">✓ 텍스트가 클립보드에 복사되었습니다!</p>
             <p class="info">맞춤법 검사 사이트에서 <strong>Ctrl+V</strong> (또는 Command+V)로 붙여넣으세요.</p>
+            <p class="info" style="font-size: 0.85em; margin-top: 8px; opacity: 0.8;">※ 사이트가 열리지 않으면 <strong>Ctrl+Shift+R</strong> (Mac: Command+Shift+R)로 새로고침해주세요.</p>
         `;
 
         // 네이버 맞춤법 검사기 새 창으로 열기
@@ -67,6 +68,7 @@ async function checkSpelling() {
             spellCheckResult.innerHTML = `
                 <p class="success">✓ 텍스트가 복사되었습니다!</p>
                 <p class="info">맞춤법 검사 사이트에서 <strong>Ctrl+V</strong> (또는 Command+V)로 붙여넣으세요.</p>
+                <p class="info" style="font-size: 0.85em; margin-top: 8px; opacity: 0.8;">※ 사이트가 열리지 않으면 <strong>Ctrl+Shift+R</strong> (Mac: Command+Shift+R)로 새로고침해주세요.</p>
             `;
 
             window.open('https://kornorms.korean.go.kr/kornorms/regltn/regltnView.do?regltn_code=0003#a', '_blank');
