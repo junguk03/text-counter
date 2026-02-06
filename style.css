@@ -39,6 +39,15 @@ header h1 {
     opacity: 0.95;
 }
 
+.info-hint {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
 main {
     padding: 30px;
 }
